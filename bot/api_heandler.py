@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from bot.api_methods import getUpdates
 from bot.api_objects import Update
+from bot.events import Event, Unrecognised
 from src.account import Accounter
 from src.storage import Keeper
 
@@ -22,4 +23,7 @@ class MessageHandler(BaseModel):
         pass
 
     def update_handle(self, u: Update) -> None:
-        pass
+        event = self.parse_event(u)
+
+    def parse_event(self, u: Update) -> Event:
+        return Unrecognised()
