@@ -37,9 +37,9 @@ class getUpdates(Request):
     allowed_updates: list | str = 'chat_member'
 
     @property
-    def result(self) -> list[Update] | None:
-        if self.response is None or self.response.status_code == 200: return None
-        res = []
+    def result(self) -> list[Update]:
+        res: list[Update] = []
+        if self.response is None or self.response.status_code != 200: return res
         updates: list = json.loads(self.response.content.decode('utf-8'))['result']
         for u in updates:
             res.append(Update(**u))
