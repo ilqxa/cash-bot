@@ -1,14 +1,13 @@
 import time
 from abc import ABC, abstractmethod
 from typing import Any
+import json
 
-import aiohttp
 import requests
 from requests import Response
-from aiohttp import ClientResponse
 from pydantic import BaseModel
 
-from bot.api_objects import ApiObject
+from bot.api_objects import ApiObject, Update
 from conf.api_telegram import TelegramBot
 
 
@@ -17,16 +16,12 @@ class Request(BaseModel):
     obj: ApiObject | None = None
     conf = TelegramBot() # type: ignore
     completed: int | None = None
-    result: ClientResponse | Response | None = None
+    response: Response | None = None
 
-    # async def __post_init_post_parse__(self) -> Any:
-    #     async with aiohttp.ClientSession() as session:
-    #         self.result = await session.post(self.conf.url + self.method, json=self.obj, headers=self.conf.headers)
-    #     self.completed = int(time.time())
-
-    def __post_init__(self) -> Any:
+    def __init__(self, **data) -> None:
+        super().__init__(**data)
         with requests.Session() as session:
-            self.result = session.post(self.conf.url + self.method, json=self.obj, headers=self.conf.headers)
+            self.response = session.post(self.conf.url + self.method, json=self.obj, headers=self.conf.headers)
         self.completed = int(time.time())
 
     class Config:
@@ -40,3 +35,12 @@ class getUpdates(Request):
     limit: int = 100
     timeout: int = 0
     allowed_updates: list | str = 'chat_member'
+
+    @property
+    def result(self) -> list[Update] | None:
+        if self.response is None or self.response.status_code == 200: return None
+        res = []
+        updates: list = json.loads(self.response.content.decode('utf-8'))['result']
+        for u in updates:
+            res.append(Update(**u))
+        return res
