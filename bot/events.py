@@ -39,7 +39,13 @@ class Unrecognised(Event):
 
 
 class NewTransaction(Event):
-    ...
+    @classmethod
+    def trying_by_template(cls, u: Update) -> bool:
+        if u.message is None or u.message.entities is None or u.message.text is None: return False
+        for e in u.message.entities:
+            if e.type == 'hashtag' and u.message.text[e.offset:e.offset+e.length] in ['#отправить', '#получить']:
+                return True
+        return False
 
 
 class RequestBalance(Event):

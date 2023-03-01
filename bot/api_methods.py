@@ -11,7 +11,7 @@ from bot.api_objects import ApiObject, Update, MessageEntity
 from conf.api_telegram import TelegramBot
 
 
-class Request(BaseModel):
+class Request(ABC, BaseModel):
     method: str
     conf = TelegramBot() # type: ignore
     completed: int | None = None
