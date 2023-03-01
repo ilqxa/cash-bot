@@ -8,19 +8,18 @@ from src.account import Accounter
 from src.storage import Keeper
 
 
-class LongPooling(BaseModel):
+class MessageHandler(BaseModel):
     accounter: Accounter
 
-    def run(self) -> None:
+    def start_long_pooling(self) -> None:
         while True:
             query = getUpdates()
             for u in query.result:
-                self.handle(u)
+                self.update_handle(u)
             sleep(5)
 
-    def handle(self, u: Update) -> None:
+    def set_webhook(self) -> None:
         pass
 
-
-class WebHook(BaseModel):
-    ...
+    def update_handle(self, u: Update) -> None:
+        pass
