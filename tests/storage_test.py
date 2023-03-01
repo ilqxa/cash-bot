@@ -6,7 +6,8 @@ from src.storage import *
 def test_base():
     keeper = InMemoryKeeper()
     tr1 = Transaction(
-        id = 0,
+        chat_id = 0,
+        message_id = 0,
         reporting_ts = int(time.time()),
         sender_id = 1,
         recipient_id = 2,
@@ -14,5 +15,5 @@ def test_base():
     )
     keeper.write_transaction(tr1)
     assert len(keeper.transactions) == 1
-    res = keeper.find_transactions(id = 0)
+    res = keeper.find_transactions(chat_id = 0)
     assert len(res) == 1 and res[0] is tr1

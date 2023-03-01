@@ -12,16 +12,18 @@ class Accounter(BaseModel):
 
     def new_transaction(
         self,
+        chat_id: int,
+        message_id: int,
         reporting_date: date | datetime,
         sender_id: int,
         recipient_id: int,
         amount: float,
         comment: str | None = None,
     ) -> None:
-        id_new = self.storage.get_last_id() + 1
         reporting_ts = int(time.mktime(reporting_date.timetuple()))
         tr = Transaction(
-            id = id_new,
+            chat_id = chat_id,
+            message_id = message_id,
             reporting_ts = reporting_ts,
             sender_id = sender_id,
             recipient_id = recipient_id,
@@ -63,7 +65,6 @@ class Accounter(BaseModel):
         res['amount'] = res.apply(lambda s: s['amount'] if s['sender_id'] == person_id else -s['amount'], axis=1)
         res['partner_id'] = res.apply(lambda s: s['recipient_id'] if s['sender_id'] == person_id else s['recipient_id'], axis=1)
         res = res.sort_values(by='reporting_ts')
-        # res = res.drop(columns=['id', 'created_ts', 'updated_ts', 'reporting_ts', 'sender_id', 'recipient_id'])
         res = res[['partner_id', 'reporting_date', 'amount', 'comment']]
         res = res.rename(columns={
             'reporting_date': 'Дата операции',

@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 
 class Transaction(BaseModel):
-    id: int
+    chat_id: int
+    message_id: int
     created_ts: int = int(time.time())
     updated_ts: int = int(time.time())
     reporting_ts: int
@@ -16,10 +17,6 @@ class Transaction(BaseModel):
 
 
 class Keeper(BaseModel, ABC):
-
-    @abstractmethod
-    def get_last_id(self) -> int:
-        ...
 
     @abstractmethod
     def write_transaction(
@@ -38,7 +35,8 @@ class Keeper(BaseModel, ABC):
     @abstractmethod
     def find_transactions(
         self,
-        id: int | None = None,
+        chat_id: int | None = None,
+        message_id: int | None = None,
         reporting_ts_from: int | None = None,
         reporting_ts_to: int | None = None,
         sender_id: int | None = None,
@@ -51,10 +49,6 @@ class Keeper(BaseModel, ABC):
 
 class InMemoryKeeper(Keeper):
     transactions: list[Transaction] = []
-
-    def get_last_id(self) -> int:
-        if len(self.transactions) == 0: return 0
-        else: return max([t.id for t in self.transactions])
 
     def write_transaction(
         self,
@@ -70,7 +64,8 @@ class InMemoryKeeper(Keeper):
 
     def find_transactions(
         self,
-        id: int | None = None,
+        chat_id: int | None = None,
+        message_id: int | None = None,
         reporting_ts_from: int | None = None,
         reporting_ts_to: int | None = None,
         sender_id: int | None = None,
@@ -81,7 +76,8 @@ class InMemoryKeeper(Keeper):
         res = []
         for t in self.transactions:
             if (
-                (id is None or t.id == id) and
+                (chat_id is None or t.chat_id == chat_id) and
+                (message_id is None or t.message_id == message_id) and
                 (reporting_ts_from is None or t.reporting_ts >= reporting_ts_from) and
                 (reporting_ts_to is None or t.reporting_ts <= reporting_ts_to) and
                 (sender_id is None or t.sender_id == sender_id) and
