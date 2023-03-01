@@ -7,13 +7,12 @@ import requests
 from requests import Response
 from pydantic import BaseModel
 
-from bot.api_objects import ApiObject, Update
+from bot.api_objects import ApiObject, Update, MessageEntity
 from conf.api_telegram import TelegramBot
 
 
 class Request(BaseModel):
     method: str
-    obj: ApiObject | None = None
     conf = TelegramBot() # type: ignore
     completed: int | None = None
     response: Response | None = None
@@ -21,7 +20,11 @@ class Request(BaseModel):
     def __init__(self, **data) -> None:
         super().__init__(**data)
         with requests.Session() as session:
-            self.response = session.post(self.conf.url + self.method, json=self.obj, headers=self.conf.headers)
+            self.response = session.post(
+                self.conf.url + self.method,
+                json=self.dict(exclude={'method', 'conf', 'completed', 'response'}),
+                headers=self.conf.headers
+            )
         self.completed = int(time.time())
 
     class Config:
@@ -44,3 +47,12 @@ class getUpdates(Request):
         for u in updates:
             res.append(Update(**u))
         return res
+    
+
+class sendMessage(Request):
+    method: str = '/sendMessage'
+    chat_id: int | str
+    text: str
+    parse_mode: str = 'MarkdownV2'
+    entities: list[MessageEntity] | None = None
+    reply_to_message_id: int | None = None

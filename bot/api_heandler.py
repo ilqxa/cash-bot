@@ -1,16 +1,18 @@
 from time import sleep
+from typing import Type
 
 from pydantic import BaseModel
 
 from bot.api_methods import getUpdates
 from bot.api_objects import Update
-from bot.events import Event, Unrecognised
+from bot.events import Event, NewTransaction, Unrecognised
 from src.account import Accounter
 from src.storage import Keeper
 
 
 class MessageHandler(BaseModel):
     accounter: Accounter
+    events: list[Type[Event]] = [NewTransaction, Unrecognised] # type: ignore
 
     def start_long_pooling(self) -> None:
         while True:
@@ -23,7 +25,7 @@ class MessageHandler(BaseModel):
         pass
 
     def update_handle(self, u: Update) -> None:
-        event = self.parse_event(u)
-
-    def parse_event(self, u: Update) -> Event:
-        return Unrecognised()
+        for e in self.events:
+            if e.trying_by_template(u):
+                event = e(update=u)
+                continue

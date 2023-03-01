@@ -15,9 +15,11 @@ class Update(ApiObject):
 
 class Message(ApiObject):
     message_id: int
+    date: int
     from_user: User | None = Field(alias='from')
     chat: Chat
     text: str | None
+    entities: list[MessageEntity] | None
 
 
 class Chat(ApiObject):
@@ -31,7 +33,18 @@ class User(ApiObject):
     username: str | None
 
 
+class MessageEntity(ApiObject):
+    type: str
+    offset: int
+    length: int
+    url: str | None
+    user: User | None
+    language: str | None
+    custom_emoji_id: str | None
+
+
 Update.update_forward_refs()
 Message.update_forward_refs()
 Chat.update_forward_refs()
 User.update_forward_refs()
+MessageEntity.update_forward_refs()
