@@ -34,7 +34,7 @@ class Accounter(BaseModel):
         self,
         person_id: int,
         reporting_date: date,
-    ) -> None:
+    ) -> list[Transaction]:
         ts_to = int(time.mktime(reporting_date.timetuple())) - 1
         debts = self.storage.find_transactions(sender_id=person_id, reporting_ts_to=ts_to)
         creds = self.storage.find_transactions(recipient_id=person_id, reporting_ts_to=ts_to)

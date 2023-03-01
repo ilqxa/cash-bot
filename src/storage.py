@@ -12,7 +12,7 @@ class Transaction(BaseModel):
     sender_id: int
     recipient_id: int
     amount: float
-    comment: str | None
+    comment: str | None = None
 
 
 class Keeper(BaseModel, ABC):
